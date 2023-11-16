@@ -1,0 +1,9 @@
+# proxy configuration
+# include from server directive
+proxy_connect_timeout 90;
+proxy_send_timeout 90;
+proxy_read_timeout 90;
+proxy_buffers 32 4k;
+
+# proxy headers
+proxy_set_header Host $host;

@@ -1,0 +1,28 @@
+# pgadmin
+server {
+  listen ${NGINX_PORT};
+  server_name pgadmin${NGINX_DOMAIN};
+  include /etc/nginx/conf.d/acme.inc;
+  return 301 https://$server_name$request_uri;
+} 
+server {
+  # set resolver, so if upstream is unavailable, nginx starts
+  # resolver is docker resolver for container name...
+  resolver 127.0.0.11 valid=30s;
+  set $pgadmin postgres12_pgadmin_1:80;
+  
+  listen 443 ssl;
+  include /etc/nginx/conf.d/pgadmin${NGINX_DOMAIN}_tls.inc;
+  #include /etc/nginx/conf.d/proxy.conf;
+  server_name pgadmin${NGINX_DOMAIN};
+
+  location / {
+    proxy_set_header Host $host;
+    proxy_set_header X-Scheme $scheme;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_redirect off;
+    proxy_pass http://$pgadmin;
+  }
+  include /etc/nginx/conf.d/acme.inc;
+}

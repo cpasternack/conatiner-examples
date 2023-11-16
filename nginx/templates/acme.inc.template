@@ -1,0 +1,6 @@
+# Allow access to the ACME Challenge
+location ^~ /.well-known/acme-challenge {
+    allow all;
+    alias /acme/www;
+}
+
