@@ -1,0 +1,64 @@
+version: "3.7"
+
+volumes:
+  postgres_pgdata:
+    external:
+      name: local.pgdata.12
+  postgres_data:
+      name: postgres_data
+  pgadmin_data:
+    external:
+      name: local.pgadmindata
+#  pgadmin_config:
+#    external:
+#      name: local.pgadminconfig
+
+networks:
+  default:
+    external:
+      name: services.dbhost.example.uk
+
+services:
+  db:
+    image: postgres:12.2
+    restart: unless-stopped 
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres 
+      - POSTGRES_PASSWORD=postgrespassword12?
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data"
+      - "postgres_pgdata:/var/lib/postgresql/data/pgdata"
+    hostname: postgres.12-2.dbhost
+#    ports:
+#      - "5432:5432"
+ 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=db.admin@example.uk
+      - PGADMIN_DEFAULT_PASSWORD=database
+      - PGADMIN_LISTEN_PORT=80
+      - PGADMIN_CONFIG_LDAP_CONNECTION_TIMEOUT=30
+      - PGADMIN_CONFIG_AUTHENTICATION_SOURCES=['ldap','internal']
+      - PGADMIN_CONFIG_LDAP_AUTO_CREATE_USER=True
+      - PGADMIN_CONFIG_LDAP_SERVER_URI='ldap://ipa.example.uk:389'
+      - PGADMIN_CONFIG_LDAP_BASE_DN='cn=users,cn=accounts,dc=ipa,dc=example,d=uk'
+      - PGADMIN_CONFIG_LDAP_USERNAME_ATTRIBUTE='uid'
+      - PGADMIN_CONFIG_LDAP_BIND_USER='uid=bindread,cn=users,cn=accounts,dc=ipa,dc=example,dc=uk'
+      - PGADMIN_CONFIG_LDAP_BIND_PASSWORD='somepassword'
+      - PGADMIN_CONFIG_LDAP_SEARCH_BASE_DN=''
+      - PGADMIN_CONFIG_LDAP_SEARCH_FILTER='(cn=*)'
+      - PGADMIN_CONFIG_LDAP_SEARCH_SCOPE='SUBTREE'
+      - PGADMIN_CONFIG_LDAP_USE_STARTTLS=False
+#      - PGADMIN_CONFIG_LDAP_CA_CERT_FILE=''
+#      - PGADMIN_CONFIG_LDAP_CERT_FILE=''
+#      - PGADMIN_CONFIG_LDAP_KEY_FILE=''
+    volumes:
+    - "pgadmin_data:/var/lib/pgadmin"
+#    - "pgadmin_config:/etc/pgadmin"
+    hostname: pgadmin.dbhost
+#    ports:
+#      - "5080:80"
